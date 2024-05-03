@@ -1,0 +1,17 @@
+400: Bad request. The server cannot or will not process the request due to something that is perceived to be a client error.
+     Example: malformed request syntax, invalid request message framing, or deceptive request routing
+
+401: Valid authentication credentials is not ok
+404: Page are broken or dead links can be subject to link rot or record does no exist.
+
+500: The HTTP 500 Internal Server Error
+
+200: Ok, the request has succeeded 
+    GET: The resource has been fetched and is transmitted in the message body.
+    HEAD: The representation headers are included in the response without any message body
+    POST: The resource describing the result of the action is transmitted in the message body
+    TRACE: The message body contains the request message as received by the server.
+
+201: Ok, created success status
+
+202: Accepted, the request has been accepted, but the processing has bot been completed.
