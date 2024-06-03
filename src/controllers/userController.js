@@ -4,23 +4,23 @@ const HttpStatusCode = require('../library/error/status')
 const HttpError = require('../library/error/http-error')
 const { validationResult } = require('express-validator')
 
-const { OK, CREATED, NOT_FOUND } = HttpStatusCode
+const { OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
 
 const getAllUsers = (req, res, next) => {
   User.findAll()
     .then(users => {
-      res.status(OK).send({ status: OK, data: users })
+      res.status(OK).send({ data: users })
     })
 }
 
 const getAUserByPk = (req, res, next) => {
   const userId = req.params.userId
   User.findByPk(userId)
-    .then(status => {
-      if (status) {
-        res.status(OK).send({ status: OK, data: { status } })
+    .then(user => {
+      if (user) {
+        res.status(OK).send({ data: user })
       } else {
-        res.status(OK).send({ status: NOT_FOUND, data: 'The record does not exist' })
+        res.status(BAD_REQUEST).send({ data: 'The record does not exist' })
       }
     })
 }
@@ -29,7 +29,7 @@ const createAUser = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return res.send({ error: result })
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { email, userName, firstName, lastName, address, telephone, password, photo } = req.body
@@ -65,7 +65,7 @@ const updateAUser = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return res.send({ error: result })
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { id, email, userName, firstName, lastName, address, telephone, photo, active } = req.body

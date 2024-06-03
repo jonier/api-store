@@ -6,7 +6,7 @@ const routes = express.Router()
 
 /**
  * @swagger
- * /api/v1/user:
+ * /api/v1/users:
  *  get:
  *    summary: Return all users
  *    tags: [User]
@@ -23,7 +23,7 @@ const routes = express.Router()
 routes.get('/', User.getAllUsers)
 /**
  * @swagger
- * /api/v1/user/{userId}:
+ * /api/v1/users/{userId}:
  *  get:
  *    summary: Return a user
  *    tags: [User]
@@ -42,8 +42,10 @@ routes.get('/', User.getAllUsers)
  *            schema:
  *              type: object
  *              $ref: '#/components/schemas/User'
- *      404:
+ *      400:
  *        description: The record does not exist
+ *      404:
+ *        description: Could not find this route
  */
 routes.get('/:userId', User.getAUserByPk)
 /**
@@ -109,7 +111,7 @@ routes.get('/:userId', User.getAUserByPk)
 
 /**
  * @swagger
- * /api/v1/user:
+ * /api/v1/users:
  *  post:
  *    summary: Create a new user
  *    tags: [User]
@@ -121,8 +123,26 @@ routes.get('/:userId', User.getAUserByPk)
  *            type: object
  *            $ref: '#/components/schemas/User'
  *    responses:
+ *      200:
+ *        description: The user is already exists.
+ *        content:
+ *          application/json:
+ *            example:
+ *                status: 200
+ *                data:
+ *                  active: true
+ *                  id: 1
+ *                  email: jonierm.edu@gmail.com
+ *                  userName: jonierm.edu
+ *                  firstName: Jonier
+ *                  lastName: Murillo
+ *                  address: 16 rue Maurice Saint-Constant, J5A 1T8, QC, Canada
+ *                  telephone: 1234567890
+ *                  password: 12345678
+ *                  createdAt: 2024-04-30T22:34:29.000Z
+ *                  updateAt: 2024-04-30T18:34:29.214Z
  *      201:
- *        description: If status = 200 the user is already exists but if status = 201 the user was created.
+ *        description: The user was created.
  *        content:
  *          application/json:
  *            example:
@@ -139,6 +159,8 @@ routes.get('/:userId', User.getAUserByPk)
  *                  password: 12345678
  *                  createdAt: 2024-04-30T22:34:29.000Z
  *                  updateAt: 2024-04-30T18:34:29.214Z
+ *      400:
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error.
  */
 routes.post('/', [
   check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
@@ -153,7 +175,7 @@ routes.post('/', [
 
 /**
  * @swagger
- * /api/v1/user:
+ * /api/v1/users:
  *  patch:
  *    summary: Update a user
  *    tags: [User]
@@ -163,27 +185,30 @@ routes.post('/', [
  *        application/json:
  *          schema:
  *            type: object
- *            $ref: '#/components/schemas/User'
+ *            enum: [user, poweruser, admin]
  *    responses:
  *      200:
  *        description: User updated.
  *      404:
  *        description: The record does not exist
+ *      400:
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error.
  */
 routes.patch('/', [
+  check('id').notEmpty().withMessage('The id field is missing'),
   check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
     .isEmail().withMessage('Not a valid e-mail address'),
-  check('userName').notEmpty().withMessage("The string can't be empty"),
-  check('userName').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
-  check('firstName').notEmpty().withMessage("The string can't be empty"),
-  check('lastName').notEmpty().withMessage("The string can't be empty"),
-  check('address').notEmpty().withMessage("The string can't be empty"),
-  check('telephone').notEmpty().withMessage("The string can't be empty")
+  check('userName').notEmpty().withMessage("The userName can't be empty"),
+  check('userName').isLength({ min: 8 }).withMessage('The userName can be less than 8 characters'),
+  check('firstName').notEmpty().withMessage("The firstName can't be empty"),
+  check('lastName').notEmpty().withMessage("The lastName can't be empty"),
+  check('address').notEmpty().withMessage("The address can't be empty"),
+  check('telephone').notEmpty().withMessage("The telephone can't be empty")
 ], User.updateAUser)
 
 /**
  * @swagger
- * /api/v1/user/{userId}:
+ * /api/v1/users/{userId}:
  *  delete:
  *    summary: Delete a user
  *    tags: [User]

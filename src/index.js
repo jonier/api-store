@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 const swaggerUI = require('swagger-ui-express')
 
 const HttpError = require('./library/error/http-error')
@@ -42,14 +43,16 @@ const orderStatusRouter = require('./v1/routes/orderStatusRouter')
 const orderRouter = require('./v1/routes/orderRouter')
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3002
 
 // Middlewares
+
+app.use(cors())
 app.use(morgan('tiny'))
 app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-
 app.use('/api/v1/product', productRouter)
-app.use('/api/v1/user', userRouter)
+app.use('/api/v1/users', userRouter)
 app.use('/api/v1/kindofproduct', kindOfProductRouter)
 app.use('/api/v1/orderstatus', orderStatusRouter)
 app.use('/api/v1/order', orderRouter)
@@ -64,7 +67,8 @@ app.use((error, req, res, next) => {
   if (res.headerSend) {
     return next(error)
   }
-  res.status(error.code || 500).send({ status: error.code || 500, message: JSON.parse(error.message) || 'An unknown error occurred' })
+  // res.status(error.code || 500).send({ status: error.code || 500, message: JSON.parse(error.message) || 'An unknown error occurred' })
+  res.status(error.code || 500).send({ message: JSON.parse(error.message) || 'An unknown error occurred' })
 })
 
 sequelize
