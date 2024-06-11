@@ -7,11 +7,11 @@ const options = {
     openapi: '3.1.0',
     info: {
       title: 'API Store',
-      version: '1.0'
+      version: '1.0.0'
     },
     servers: [
       {
-        url: 'http://localhost:3002',
+        url: 'http://localhost:3001',
         description: 'API Server'
       }
     ]

@@ -17,10 +17,11 @@ const getAUserByPk = (req, res, next) => {
   const userId = req.params.userId
   User.findByPk(userId)
     .then(user => {
+      console.log('Vea posible respuesta: ', user)
       if (user) {
         res.status(OK).send({ data: user })
       } else {
-        res.status(BAD_REQUEST).send({ data: 'The record does not exist' })
+        res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
     })
 }
@@ -51,9 +52,9 @@ const createAUser = async (req, res, next) => {
       }
     })
     if (created) {
-      res.status(CREATED).send({ status: CREATED, data: user })
+      res.status(CREATED).send({ data: user })
     } else {
-      res.status(OK).send({ status: OK, data: user })
+      res.status(OK).send({ data: user })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)

@@ -12,13 +12,16 @@ const routes = express.Router()
  *    tags: [User]
  *    responses:
  *      200:
- *        description: Get all users.
+ *        description: Successfully returned information about users
  *        content:
  *          application/json:
  *            schema:
- *              type: array
- *              items:
- *                $ref: '#/components/schemas/User'
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/User'
  */
 routes.get('/', User.getAllUsers)
 /**
@@ -41,11 +44,20 @@ routes.get('/', User.getAllUsers)
  *          application/json:
  *            schema:
  *              type: object
- *              $ref: '#/components/schemas/User'
- *      400:
- *        description: The record does not exist
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/User'
  *      404:
- *        description: Could not find this route
+ *        description: The record does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
  */
 routes.get('/:userId', User.getAUserByPk)
 /**
@@ -100,13 +112,18 @@ routes.get('/:userId', User.getAUserByPk)
  *        - telephone
  *        - password
  *      example:
+ *        id: 1
  *        email: jonierm.edu@gmail.com
  *        userName: jonierm.edu
  *        firstName: Jonier
  *        lastName: Murillo
+ *        photo: null
  *        address: 16 rue Maurice Saint-Constant, J5A 1T8, QC, Canada
  *        telephone: 1234567890
  *        password: 12345678
+ *        active: true
+ *        createAt: "2024-04-11T01:36:21.000Z"
+ *        updateAt: "2024-04-11T01:36:21.000Z"
  */
 
 /**
@@ -127,38 +144,22 @@ routes.get('/:userId', User.getAUserByPk)
  *        description: The user is already exists.
  *        content:
  *          application/json:
- *            example:
- *                status: 200
+ *            schema:
+ *              type: object
+ *              properties:
  *                data:
- *                  active: true
- *                  id: 1
- *                  email: jonierm.edu@gmail.com
- *                  userName: jonierm.edu
- *                  firstName: Jonier
- *                  lastName: Murillo
- *                  address: 16 rue Maurice Saint-Constant, J5A 1T8, QC, Canada
- *                  telephone: 1234567890
- *                  password: 12345678
- *                  createdAt: 2024-04-30T22:34:29.000Z
- *                  updateAt: 2024-04-30T18:34:29.214Z
+ *                  type: object
+ *                  $ref: '#/components/schemas/User'
  *      201:
  *        description: The user was created.
  *        content:
  *          application/json:
- *            example:
- *                status: 201
+ *            schema:
+ *              type: object
+ *              properties:
  *                data:
- *                  active: true
- *                  id: 1
- *                  email: jonierm.edu@gmail.com
- *                  userName: jonierm.edu
- *                  firstName: Jonier
- *                  lastName: Murillo
- *                  address: 16 rue Maurice Saint-Constant, J5A 1T8, QC, Canada
- *                  telephone: 1234567890
- *                  password: 12345678
- *                  createdAt: 2024-04-30T22:34:29.000Z
- *                  updateAt: 2024-04-30T18:34:29.214Z
+ *                  type: object
+ *                  $ref: '#/components/schemas/User'
  *      400:
  *        description: The server cannot or will not process the request due to something that is perceived to be a client error.
  */
