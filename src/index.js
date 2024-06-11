@@ -43,7 +43,7 @@ const orderStatusRouter = require('./v1/routes/orderStatusRouter')
 const orderRouter = require('./v1/routes/orderRouter')
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3000
 
 // Middlewares
 

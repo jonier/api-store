@@ -17,7 +17,6 @@ const getAUserByPk = (req, res, next) => {
   const userId = req.params.userId
   User.findByPk(userId)
     .then(user => {
-      console.log('Vea posible respuesta: ', user)
       if (user) {
         res.status(OK).send({ data: user })
       } else {
@@ -88,7 +87,7 @@ const updateAUser = async (req, res, next) => {
       const obj = await user.save()
 
       if (obj) {
-        res.status(OK).send({ status: OK, data: obj })
+        res.status(OK).send({ data: obj })
       }
     }
   } catch (error) {
@@ -104,9 +103,9 @@ const deleteAUserByPk = async (req, res, next) => {
     const user = await User.findByPk(userId)
     if (user) {
       user.destroy()
-      next(new HttpError('The record has been deleted', OK))
+      res.status(OK).send({data: 'The record has been deleted'})
     } else {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({data: 'The record does not exist'})
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)

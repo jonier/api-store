@@ -6,62 +6,6 @@ const routes = express.Router()
 
 /**
  * @swagger
- * /api/v1/users:
- *  get:
- *    summary: Return all users
- *    tags: [User]
- *    responses:
- *      200:
- *        description: Successfully returned information about users
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                data:
- *                  type: array
- *                  items:
- *                    $ref: '#/components/schemas/User'
- */
-routes.get('/', User.getAllUsers)
-/**
- * @swagger
- * /api/v1/users/{userId}:
- *  get:
- *    summary: Return a user
- *    tags: [User]
- *    parameters:
- *      - in: path
- *        name: userId
- *        schema:
- *          type: number
- *        required: true
- *        description: User id
- *    responses:
- *      200:
- *        description: Get a user.
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                data:
- *                  type: object
- *                  $ref: '#/components/schemas/User'
- *      404:
- *        description: The record does not exist
- *        content:
- *          application/json:
- *            schema:
- *              type: object
- *              properties:
- *                data:
- *                  type: string
- *                  example: The record does not exist
- */
-routes.get('/:userId', User.getAUserByPk)
-/**
- * @swagger
  * components:
  *  schemas:
  *    User:
@@ -124,6 +68,26 @@ routes.get('/:userId', User.getAUserByPk)
  *        active: true
  *        createAt: "2024-04-11T01:36:21.000Z"
  *        updateAt: "2024-04-11T01:36:21.000Z"
+ *    error:
+ *      type: object
+ *      properties:
+ *        type:
+ *          type: string
+ *          description: field
+ *        msg:
+ *          type: string
+ *          description: Error description
+ *        path:
+ *          type: string
+ *          description: Path
+ *        location:
+ *          type: string
+ *          description: Body
+ *      example:
+ *        type: field
+ *        msg: The string can't be empty
+ *        path: userName
+ *        location: Body 
  */
 
 /**
@@ -161,7 +125,19 @@ routes.get('/:userId', User.getAUserByPk)
  *                  type: object
  *                  $ref: '#/components/schemas/User'
  *      400:
- *        description: The server cannot or will not process the request due to something that is perceived to be a client error.
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error. Errors are collected by Sequelize.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: object
+ *                  properties:
+ *                    errors:
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/error'
  */
 routes.post('/', [
   check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
@@ -186,14 +162,32 @@ routes.post('/', [
  *        application/json:
  *          schema:
  *            type: object
- *            enum: [user, poweruser, admin]
+ *            $ref: '#/components/schemas/User'
  *    responses:
  *      200:
- *        description: User updated.
- *      404:
- *        description: The record does not exist
+ *        description: The user has been updated.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/User'
  *      400:
- *        description: The server cannot or will not process the request due to something that is perceived to be a client error.
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error. Errors are collected by Sequelize.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: object
+ *                  properties:
+ *                    errors:
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/error'
  */
 routes.patch('/', [
   check('id').notEmpty().withMessage('The id field is missing'),
@@ -206,6 +200,64 @@ routes.patch('/', [
   check('address').notEmpty().withMessage("The address can't be empty"),
   check('telephone').notEmpty().withMessage("The telephone can't be empty")
 ], User.updateAUser)
+
+/**
+ * @swagger
+ * /api/v1/users:
+ *  get:
+ *    summary: Return all users
+ *    tags: [User]
+ *    responses:
+ *      200:
+ *        description: Successfully returned information about users
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/User'
+ */
+routes.get('/', User.getAllUsers)
+
+/**
+ * @swagger
+ * /api/v1/users/{userId}:
+ *  get:
+ *    summary: Return a user
+ *    tags: [User]
+ *    parameters:
+ *      - in: path
+ *        name: userId
+ *        schema:
+ *          type: number
+ *        required: true
+ *        description: User id
+ *    responses:
+ *      200:
+ *        description: Get a user.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/User'
+ *      404:
+ *        description: The record does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
+ */
+routes.get('/:userId', User.getAUserByPk)
 
 /**
  * @swagger
@@ -222,9 +274,25 @@ routes.patch('/', [
  *        description: User id
  *    responses:
  *      200:
- *        description: User deleted.
+ *        description: The record has been deleted.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record has been deleted
  *      404:
- *        description: The record does not exist
+ *        description: The record does not exist.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
  */
 routes.delete('/:userId', User.deleteAUserByPk)
 
