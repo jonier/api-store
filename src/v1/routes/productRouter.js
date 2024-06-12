@@ -4,10 +4,6 @@ const { check } = require('express-validator')
 
 const routes = express.Router()
 
-routes.get('/', Product.getAllProducts)
-
-routes.get('/:productId', Product.getAProductByPk)
-
 /**
  * @swagger
  * components:
@@ -66,7 +62,7 @@ routes.get('/:productId', Product.getAProductByPk)
 
 /**
  * @swagger
- * /api/v1/product:
+ * /api/v1/products:
  *  post:
  *    summary: Create a new user
  *    tags: [Product]
@@ -135,6 +131,55 @@ routes.post('/',
     check('kindOfProductId').notEmpty().withMessage('The kindOfProductId can not empty')
   ], Product.postCreateAProduct)
 
+/**
+ * @swagger
+ * /api/v1/products:
+ *  patch:
+ *    summary: Update a product
+ *    tags: [Product]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/Product'
+ *    responses:
+ *      200:
+ *        description: The product has been updated.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/Product'
+ *      400:
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error. Errors are collected by Sequelize.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: object
+ *                  properties:
+ *                    errors:
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/error'
+ *      404:
+ *        description: The record does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
+ */
 routes.patch('/',
   [
     check('title').notEmpty().withMessage("The string can't be empty"),
@@ -146,6 +191,100 @@ routes.patch('/',
     check('userId').notEmpty().withMessage('The userId can not empty'),
     check('kindOfProductId').notEmpty().withMessage('The kindOfProductId can not empty')
   ], Product.patchUpdateAProduct)
+
+/**
+ * @swagger
+ * /api/v1/products:
+ *  get:
+ *    summary: Return all products
+ *    tags: [Product]
+ *    responses:
+ *      200:
+ *        description: Successfully returned information about products
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/Product'
+ */
+routes.get('/', Product.getAllProducts)
+
+/**
+ * @swagger
+ * /api/v1/products/{productId}:
+ *  get:
+ *    summary: Return a product
+ *    tags: [Product]
+ *    parameters:
+ *      - in: path
+ *        name: productId
+ *        schema:
+ *          type: number
+ *        required: true
+ *        description: Product id
+ *    responses:
+ *      200:
+ *        description: Get a product.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/Product'
+ *      404:
+ *        description: The record does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
+ */
+routes.get('/:productId', Product.getAProductByPk)
+
+/**
+ * @swagger
+ * /api/v1/products/{productId}:
+ *  delete:
+ *    summary: Delete a product
+ *    tags: [Product]
+ *    parameters:
+ *      - in: path
+ *        name: productId
+ *        schema:
+ *          type: number
+ *        required: true
+ *        description: Product id
+ *    responses:
+ *      200:
+ *        description: The record has been deleted.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record has been deleted
+ *      404:
+ *        description: The record does not exist.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
+ */
 
 routes.delete('/:productId', Product.deleteAProductByPk)
 

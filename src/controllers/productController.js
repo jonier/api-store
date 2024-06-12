@@ -12,23 +12,23 @@ const { OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
 const getAllProducts = (req, res, next) => {
   Product.findAll()
     .then(products => {
-      res.status(OK).send({ status: OK, data: products })
+      res.status(OK).send({ data: products })
     })
 }
 
 const getAProductByPk = (req, res, next) => {
-  const productId = req.params
+  const { productId } = req.params
 
   Product.findByPk(productId)
     .then(product => {
       if (product) {
-        res.status(OK).send({ status: OK, data: { product } })
+        res.status(OK).send({ data: product })
       } else {
-        res.status(OK).send({ status: NOT_FOUND, data: 'The record does not exist' })
+        res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
     })
     .catch(error => {
-      res.status(NOT_FOUND).send({ status: NOT_FOUND, data: error })
+      res.status(NOT_FOUND).send({ data: error })
     })
 }
 
@@ -79,20 +79,6 @@ const postCreateAProduct = async (req, res, next) => {
     const e = getErrorFromCoreOrDb(error.errors)
     next(new HttpError(e.msg, e.status))
   }
-
-  // try {
-  //   Product.create(newProduct)
-  //     .then(product => {
-  //       res.status(CREATED).send({ data: product })
-  //     })
-  //     .catch(error => {
-  //       const e = getErrorFromCoreOrDb(error.errors)
-  //       next(new HttpError(e.msg, e.status))
-  //     })
-  // } catch (error) {
-  //   const e = getErrorFromCoreOrDb(error.errors)
-  //   next(new HttpError(e.msg, e.status))
-  // }
 }
 
 const patchUpdateAProduct = async (req, res, next) => {
@@ -150,9 +136,9 @@ const deleteAProductByPk = async (req, res, next) => {
     const product = await Product.findByPk(productId)
     if (product) {
       product.destroy()
-      next(new HttpError('The record has been deleted', OK))
+      res.status(OK).send({ data: 'The record has been deleted' })
     } else {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
