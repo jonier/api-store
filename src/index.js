@@ -53,8 +53,8 @@ app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/users', userRouter)
-app.use('/api/v1/kindofproduct', kindOfProductRouter)
 app.use('/api/v1/orderstatus', orderStatusRouter)
+app.use('/api/v1/kindofproduct', kindOfProductRouter)
 app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/doc', swaggerUI.serve, swaggerUI.setup(swaggerSpec))
 

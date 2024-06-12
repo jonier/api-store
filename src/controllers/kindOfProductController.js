@@ -9,7 +9,7 @@ const { OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
 const getAllKOProduct = (req, res, next) => {
   KindOfProduct.findAll()
     .then(kind => {
-      res.status(OK).send({ status: '200', data: kind })
+      res.status(OK).send({ data: kind })
     })
 }
 
@@ -19,9 +19,9 @@ const getAKOProductByPk = (req, res, next) => {
   KindOfProduct.findByPk(kindOfProductId)
     .then(kind => {
       if (kind) {
-        res.status(OK).send({ status: OK, data: kind })
+        res.status(OK).send({ data: kind })
       } else {
-        res.status(OK).send({ status: OK, data: 'The record does not exist' })
+        res.status(OK).send({ data: 'The record does not exist' })
       }
     })
 }
@@ -30,7 +30,7 @@ const createAKOProduct = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return next(new HttpError(result, BAD_REQUEST))
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { title, active } = req.body
@@ -47,9 +47,9 @@ const createAKOProduct = async (req, res, next) => {
     })
 
     if (created) {
-      res.status(CREATED).send({ status: CREATED, data: kind })
+      res.status(CREATED).send({ data: kind })
     } else {
-      res.status(OK).send({ status: OK, data: kind })
+      res.status(OK).send({ data: kind })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
@@ -61,14 +61,15 @@ const updateAKOProduct = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return next(new HttpError(result, BAD_REQUEST))
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { id, title, active } = req.body
+
   try {
     const kind = await KindOfProduct.findByPk(id)
     if (kind === null) {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     } else {
       kind.title = title
       kind.active = active
@@ -76,7 +77,7 @@ const updateAKOProduct = async (req, res, next) => {
       const obj = await kind.save()
 
       if (obj) {
-        res.status(OK).send({ status: OK, data: obj })
+        res.status(OK).send({ data: obj })
       }
     }
   } catch (error) {
@@ -92,9 +93,9 @@ const deleteAKOProductByPk = async (req, res, next) => {
     const kind = await KindOfProduct.findByPk(kindOfProductId)
     if (kind) {
       kind.destroy()
-      next(new HttpError('The record has been deleted', OK))
+      res.status(OK).send({ data: 'The record has been deleted' })
     } else {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)

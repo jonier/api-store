@@ -73,7 +73,7 @@ const updateAUser = async (req, res, next) => {
   try {
     const user = await User.findByPk(id)
     if (user === null) {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     } else {
       user.email = email
       user.userName = userName
@@ -103,9 +103,9 @@ const deleteAUserByPk = async (req, res, next) => {
     const user = await User.findByPk(userId)
     if (user) {
       user.destroy()
-      res.status(OK).send({data: 'The record has been deleted'})
+      res.status(OK).send({ data: 'The record has been deleted' })
     } else {
-      res.status(NOT_FOUND).send({data: 'The record does not exist'})
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)

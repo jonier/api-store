@@ -87,7 +87,7 @@ const routes = express.Router()
  *        type: field
  *        msg: The string can't be empty
  *        path: userName
- *        location: Body 
+ *        location: Body
  */
 
 /**
@@ -188,6 +188,16 @@ routes.post('/', [
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      404:
+ *        description: The record does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The record does not exist
  */
 routes.patch('/', [
   check('id').notEmpty().withMessage('The id field is missing'),

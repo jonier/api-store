@@ -9,7 +9,7 @@ const { OK, CREATED, BAD_REQUEST, NOT_FOUND } = HttpStatusCode
 const getAllOrderStatus = (req, res, next) => {
   OrderStatus.findAll()
     .then(orders => {
-      res.status(OK).send({ status: OK, data: orders })
+      res.status(OK).send({ data: orders })
     })
 }
 
@@ -18,9 +18,9 @@ const getAOrderStatus = (req, res, next) => {
   OrderStatus.findByPk(orderStatusId)
     .then(status => {
       if (status) {
-        res.status(OK).send({ status: OK, data: { status } })
+        res.status(OK).send({ data: status })
       } else {
-        res.status(OK).send({ status: NOT_FOUND, data: 'The record does not exist' })
+        res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
     })
 }
@@ -29,7 +29,7 @@ const createAOrderStatus = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return next(new HttpError(result, BAD_REQUEST))
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { title, active } = req.body
@@ -46,9 +46,9 @@ const createAOrderStatus = async (req, res, next) => {
     })
 
     if (created) {
-      res.status(CREATED).send({ status: CREATED, data: order })
+      res.status(CREATED).send({ data: order })
     } else {
-      res.status(OK).send({ status: OK, data: order })
+      res.status(OK).send({ data: order })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
@@ -60,7 +60,7 @@ const updateAOrderStatus = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
-    return next(new HttpError(result, BAD_REQUEST))
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { id, title, active } = req.body
@@ -68,7 +68,7 @@ const updateAOrderStatus = async (req, res, next) => {
   try {
     const order = await OrderStatus.findByPk(id)
     if (order === null) {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     } else {
       order.title = title
       order.active = active
@@ -76,7 +76,7 @@ const updateAOrderStatus = async (req, res, next) => {
       const obj = await order.save()
 
       if (obj) {
-        res.status(OK).send({ status: OK, data: obj })
+        res.status(OK).send({ data: obj })
       }
     }
   } catch (error) {
@@ -92,9 +92,9 @@ const deleteOrderStatusById = async (req, res, next) => {
     const order = await OrderStatus.findByPk(orderStautsId)
     if (order) {
       order.destroy()
-      next(new HttpError('The record has been deleted', OK))
+      res.status(OK).send({ data: 'The record has been deleted' })
     } else {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      res.status(NOT_FOUND).send({ data: 'The record does not exist' })
     }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
