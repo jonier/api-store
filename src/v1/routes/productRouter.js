@@ -53,12 +53,15 @@ routes.get('/:productId', Product.getAProductByPk)
  *        - userId
  *        - kindOfProductId
  *      example:
+ *        id: 1
  *        title: Cien anos de soledad
  *        description: Libro de Gabriel Garcia Marquez
  *        price: 20
  *        imageUrl: /imagen/ejemplo
  *        userId: 1
  *        kindOfProductId: 1
+ *        createdAt: 2024-06-12T19:17:53.000Z
+ *        updatedAt: 2024-06-12T15:17:53.471Z
  */
 
 /**
@@ -75,40 +78,50 @@ routes.get('/:productId', Product.getAProductByPk)
  *            type: object
  *            $ref: '#/components/schemas/Product'
  *    responses:
+ *      200:
+ *        description: The Product has been created.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/Product'
  *      201:
  *        description: The Product has been created.
  *        content:
  *          application/json:
- *            example:
- *              status: 201
- *              data:
- *                active: true
- *                id: 1
- *                title: Cien anos de soledad
- *                description: Libro de Gabriel Garcia Marquez
- *                price: 20
- *                imageUrl: /imagen/ejemplo
- *                userId: 1
- *                kindOfProductId: 1
- *                createdAt: 2024-04-30T22:34:29.000Z
- *                updateAt: 2024-04-30T18:34:29.214Z
- *      200:
- *        description: The product already exists.
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  $ref: '#/components/schemas/Product'
+ *      400:
+ *        description: The server cannot or will not process the request due to something that is perceived to be a client error. Errors are collected by Sequelize.
  *        content:
  *          application/json:
- *            example:
- *              status: 200
- *              data:
- *                active: true
- *                id: 1
- *                title: Cien anos de soledad
- *                description: Libro de Gabriel Garcia Marquez
- *                price: 20
- *                imageUrl: /imagen/ejemplo
- *                userId: 1
- *                kindOfProductId: 1
- *                createdAt: 2024-04-30T22:34:29.000Z
- *                updateAt: 2024-04-30T18:34:29.214Z
+ *            schema:
+ *              type: object
+ *              properties:
+ *                error:
+ *                  type: object
+ *                  properties:
+ *                    errors:
+ *                      type: array
+ *                      items:
+ *                        $ref: '#/components/schemas/error'
+ *      404:
+ *        description: The user or kind of product does not exist
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  example: ["The user 16 does not exist", "The kind of product 44 does not exist"]
  */
 routes.post('/',
   [

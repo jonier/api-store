@@ -35,7 +35,7 @@ const getAProductByPk = (req, res, next) => {
 const postCreateAProduct = async (req, res, next) => {
   const result = validationResult(req)
   if (!result.isEmpty()) {
-    return res.send({ error: result })
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { title, description, price, imageUrl, userId, kindOfProductId } = req.body
@@ -52,33 +52,47 @@ const postCreateAProduct = async (req, res, next) => {
   }
 
   if (validatingForeingKeys.length > 0) {
-    next(new HttpError(validatingForeingKeys, BAD_REQUEST))
-  }
-
-  const newProduct = {
-    title,
-    description,
-    price,
-    imageUrl,
-    userId,
-    kindOfProductId,
-    createdAt: new Date().toLocaleString('en-US', { timeZone: 'UTC' }),
-    updatedAt: new Date().toLocaleString('en-US', { timeZone: 'UTC' })
+    return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
   }
 
   try {
-    Product.create(newProduct)
-      .then(product => {
-        res.status(CREATED).send({ status: CREATED, data: product })
-      })
-      .catch(error => {
-        const e = getErrorFromCoreOrDb(error.errors)
-        next(new HttpError(e.msg, e.status))
-      })
+    const [product, created] = await Product.findOrCreate({
+      where: { title },
+      defaults: {
+        title,
+        description,
+        price,
+        imageUrl,
+        userId,
+        kindOfProductId,
+        createdAt: new Date().toLocaleString('en-US', { timeZone: 'UTC' }),
+        updatedAt: new Date().toLocaleString('en-US', { timeZone: 'UTC' })
+      }
+    })
+
+    if (created) {
+      res.status(CREATED).send({ data: product })
+    } else {
+      res.status(OK).send({ data: product })
+    }
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
     next(new HttpError(e.msg, e.status))
   }
+
+  // try {
+  //   Product.create(newProduct)
+  //     .then(product => {
+  //       res.status(CREATED).send({ data: product })
+  //     })
+  //     .catch(error => {
+  //       const e = getErrorFromCoreOrDb(error.errors)
+  //       next(new HttpError(e.msg, e.status))
+  //     })
+  // } catch (error) {
+  //   const e = getErrorFromCoreOrDb(error.errors)
+  //   next(new HttpError(e.msg, e.status))
+  // }
 }
 
 const patchUpdateAProduct = async (req, res, next) => {
@@ -101,7 +115,7 @@ const patchUpdateAProduct = async (req, res, next) => {
   }
 
   if (validatingForeingKeys.length > 0) {
-    next(new HttpError(validatingForeingKeys, BAD_REQUEST))
+    return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
   }
 
   try {
@@ -120,7 +134,7 @@ const patchUpdateAProduct = async (req, res, next) => {
       const obj = await product.save()
 
       if (obj) {
-        res.status(OK).send({ status: OK, data: obj })
+        res.status(OK).send({ data: obj })
       }
     }
   } catch (error) {
