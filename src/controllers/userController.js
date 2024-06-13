@@ -1,10 +1,13 @@
+const { Op } = require('sequelize')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 const User = require('../models/user')
 const { getErrorFromCoreOrDb } = require('../library/error/list-errors')
 const HttpStatusCode = require('../library/error/status')
 const HttpError = require('../library/error/http-error')
 const { validationResult } = require('express-validator')
 
-const { OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
+const { AUTH_IS_NO_OK, OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
 
 const getAllUsers = (req, res, next) => {
   User.findAll()
@@ -58,6 +61,50 @@ const createAUser = async (req, res, next) => {
   } catch (error) {
     const e = getErrorFromCoreOrDb(error.errors)
     next(new HttpError(e.msg, e.status))
+  }
+}
+
+const postLogin = async (req, res, next) => {
+  let { identity, password } = req.body
+
+  if (typeof password === 'number') {
+    password = password.toString()
+  }
+
+  const resUser = await User.findAll({ where: { [Op.or]: [{ email: identity }, { userName: identity }] } })
+  if (resUser.length === 1) {
+    const user = resUser[0]
+
+    const isValidPassword = await bcrypt.compare(password, user.password)
+
+    if (isValidPassword) {
+      let token
+
+      try {
+        token = jwt.sign(
+          { userId: user.id, email: user.email },
+          'portfolio21',
+          { expiresIn: '1h' }
+        )
+      } catch (error) {
+        res.status(BAD_REQUEST).send({ data: error })
+      }
+
+      res.status(OK).send({
+        data: {
+          id: user.id,
+          name: user.name,
+          userName: user.userName,
+          address: user.address,
+          email: user.email,
+          token
+        }
+      })
+    } else {
+      res.status(AUTH_IS_NO_OK).send({ data: 'The password is wrong' })
+    }
+  } else {
+    res.status(AUTH_IS_NO_OK).send({ data: 'User does not exist' })
   }
 }
 
@@ -117,6 +164,7 @@ module.exports = {
   getAllUsers,
   getAUserByPk,
   createAUser,
+  postLogin,
   updateAUser,
   deleteAUserByPk
 }

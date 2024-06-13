@@ -8,6 +8,21 @@ const routes = express.Router()
  * @swagger
  * components:
  *  schemas:
+ *    Login:
+ *      type: object
+ *      properties:
+ *        identity:
+ *          type: number
+ *          description: Login with email or username
+ *        password:
+ *          type: string
+ *          description: the user password
+ *      required:
+ *        - identity
+ *        - password
+ *      example:
+ *        identity: jonierm.edu@gmail.com
+ *        password: 12345678
  *    User:
  *      type: object
  *      properties:
@@ -64,7 +79,7 @@ const routes = express.Router()
  *        photo: null
  *        address: 16 rue Maurice Saint-Constant, J5A 1T8, QC, Canada
  *        telephone: 1234567890
- *        password: 12345678
+ *        password: "12345678"
  *        active: true
  *        createAt: "2024-04-11T01:36:21.000Z"
  *        updateAt: "2024-04-11T01:36:21.000Z"
@@ -92,7 +107,7 @@ const routes = express.Router()
 
 /**
  * @swagger
- * /api/v1/users:
+ * /api/v1/users/signup:
  *  post:
  *    summary: Create a new user
  *    tags: [User]
@@ -139,7 +154,7 @@ const routes = express.Router()
  *                      items:
  *                        $ref: '#/components/schemas/error'
  */
-routes.post('/', [
+routes.post('/signup', [
   check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
     .isEmail().withMessage('Not a valid e-mail address'),
   check('userName').notEmpty().withMessage("The string can't be empty"),
@@ -147,8 +162,51 @@ routes.post('/', [
   check('firstName').notEmpty().withMessage("The string can't be empty"),
   check('lastName').notEmpty().withMessage("The string can't be empty"),
   check('address').notEmpty().withMessage("The string can't be empty"),
-  check('telephone').notEmpty().withMessage("The string can't be empty")
+  check('telephone').notEmpty().withMessage("The string can't be empty"),
+  check('password').isLength({ min: 8 }).withMessage('The string can be less than 8 characters')
 ], User.createAUser)
+
+/**
+ * @swagger
+ * /api/v1/users/login:
+ *  post:
+ *    summary: Login
+ *    tags: [User]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            $ref: '#/components/schemas/Login'
+ *    responses:
+ *      200:
+ *        description: Get a user.
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: object
+ *                  example:
+ *                    id: 1
+ *                    userName: "jonier.edu"
+ *                    address:  "16 rue Maurice, Saint-Constant, QC, Canada"
+ *                    email: "jonierm.edu@gmail.com"
+ *                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiam9uaWVybWVkdUBnbWFpbC5jb20iLCJpYXQiOjE3MTgzMTY4MjEsImV4cCI6MTcxODMyMDQyMX0.lzF-BdX_SkiQjv5Wg715GizVYpU6gGmKdbQHxTHBGkI"
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
+ */
+routes.post('/login', User.postLogin)
 
 /**
  * @swagger
