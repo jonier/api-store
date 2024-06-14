@@ -1,10 +1,10 @@
 const express = require('express')
 const { check } = require('express-validator')
-
 const orderStatusController = require('../../controllers/orderStatusController')
+const checkAuth = require('../../middleware/checkAuth')
+const routes = express.Router()
 
-const router = express.Router()
-
+routes.use(checkAuth)
 /**
  * @swagger
  * components:
@@ -66,6 +66,8 @@ const router = express.Router()
  * @swagger
  * /api/v1/orderstatus:
  *  post:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Create a new status
  *    tags: [OrderStatus]
  *    requestBody:
@@ -110,8 +112,18 @@ const router = express.Router()
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  */
-router.post('/',
+routes.post('/',
   [
     check('title').notEmpty().withMessage("The string can't be empty."),
     check('title').isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
@@ -121,6 +133,8 @@ router.post('/',
  * @swagger
  * /api/v1/orderstatus:
  *  patch:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Update a status
  *    tags: [OrderStatus]
  *    requestBody:
@@ -155,6 +169,16 @@ router.post('/',
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist
  *        content:
@@ -166,7 +190,7 @@ router.post('/',
  *                  type: string
  *                  example: The record does not exist
  */
-router.patch('/',
+routes.patch('/',
   [
     check('title').notEmpty().withMessage("The string can't be empty."),
     check('title').isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
@@ -176,6 +200,8 @@ router.patch('/',
  * @swagger
  * /api/v1/orderstatus:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return all status
  *    tags: [OrderStatus]
  *    responses:
@@ -190,13 +216,25 @@ router.patch('/',
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/OrderStatus'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  */
-router.get('/', orderStatusController.getAllOrderStatus)
+routes.get('/', orderStatusController.getAllOrderStatus)
 
 /**
  * @swagger
  * /api/v1/orderstatus/{orderStatusId}:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return a status
  *    tags: [OrderStatus]
  *    parameters:
@@ -217,6 +255,16 @@ router.get('/', orderStatusController.getAllOrderStatus)
  *                data:
  *                  type: object
  *                  $ref: '#/components/schemas/OrderStatus'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist
  *        content:
@@ -228,12 +276,14 @@ router.get('/', orderStatusController.getAllOrderStatus)
  *                  type: string
  *                  example: The record does not exist
  */
-router.get('/:orderStatusId', orderStatusController.getAOrderStatus)
+routes.get('/:orderStatusId', orderStatusController.getAOrderStatus)
 
 /**
  * @swagger
  * /api/v1/orderstatus/{orderStatusId}:
  *  delete:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Delete a status
  *    tags: [OrderStatus]
  *    parameters:
@@ -254,6 +304,16 @@ router.get('/:orderStatusId', orderStatusController.getAOrderStatus)
  *                data:
  *                  type: string
  *                  example: The record has been deleted
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist.
  *        content:
@@ -265,6 +325,6 @@ router.get('/:orderStatusId', orderStatusController.getAOrderStatus)
  *                  type: string
  *                  example: The record does not exist
  */
-router.delete('/:orderStatusId', orderStatusController.deleteOrderStatusById)
+routes.delete('/:orderStatusId', orderStatusController.deleteOrderStatusById)
 
-module.exports = router
+module.exports = routes

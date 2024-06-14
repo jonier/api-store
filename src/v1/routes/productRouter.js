@@ -1,9 +1,10 @@
 const express = require('express')
 const Product = require('../../controllers/productController')
 const { check } = require('express-validator')
-
+const checkAuth = require('../../middleware/checkAuth')
 const routes = express.Router()
 
+routes.use(checkAuth)
 /**
  * @swagger
  * components:
@@ -64,6 +65,8 @@ const routes = express.Router()
  * @swagger
  * /api/v1/products:
  *  post:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Create a new user
  *    tags: [Product]
  *    requestBody:
@@ -108,6 +111,16 @@ const routes = express.Router()
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The user or kind of product does not exist
  *        content:
@@ -135,6 +148,8 @@ routes.post('/',
  * @swagger
  * /api/v1/products:
  *  patch:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Update a product
  *    tags: [Product]
  *    requestBody:
@@ -169,6 +184,16 @@ routes.post('/',
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist
  *        content:
@@ -196,6 +221,8 @@ routes.patch('/',
  * @swagger
  * /api/v1/products:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return all products
  *    tags: [Product]
  *    responses:
@@ -210,6 +237,16 @@ routes.patch('/',
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/Product'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  */
 routes.get('/', Product.getAllProducts)
 
@@ -217,6 +254,8 @@ routes.get('/', Product.getAllProducts)
  * @swagger
  * /api/v1/products/{productId}:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return a product
  *    tags: [Product]
  *    parameters:
@@ -237,6 +276,16 @@ routes.get('/', Product.getAllProducts)
  *                data:
  *                  type: object
  *                  $ref: '#/components/schemas/Product'
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist
  *        content:
@@ -254,6 +303,8 @@ routes.get('/:productId', Product.getAProductByPk)
  * @swagger
  * /api/v1/products/{productId}:
  *  delete:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Delete a product
  *    tags: [Product]
  *    parameters:
@@ -274,6 +325,16 @@ routes.get('/:productId', Product.getAProductByPk)
  *                data:
  *                  type: string
  *                  example: The record has been deleted
+ *      401:
+ *        description: The username or password is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The user does not exist
  *      404:
  *        description: The record does not exist.
  *        content:

@@ -256,6 +256,16 @@ routes.use(checkAuth)
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist
  *        content:

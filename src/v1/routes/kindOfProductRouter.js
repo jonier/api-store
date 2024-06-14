@@ -1,8 +1,10 @@
 const express = require('express')
 const KindOfProduct = require('../../controllers/kindOfProductController')
 const { check } = require('express-validator')
+const checkAuth = require('../../middleware/checkAuth')
 const routes = express.Router()
 
+routes.use(checkAuth)
 /**
  * @swagger
  * components:
@@ -64,6 +66,8 @@ const routes = express.Router()
  * @swagger
  * /api/v1/kindofproduct:
  *  post:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Create a new kind of product
  *    tags: [KindOfProduct]
  *    requestBody:
@@ -108,6 +112,16 @@ const routes = express.Router()
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  */
 routes.post('/',
   [
@@ -118,6 +132,8 @@ routes.post('/',
  * @swagger
  * /api/v1/kindofproduct:
  *  patch:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Update a kind of product
  *    tags: [KindOfProduct]
  *    requestBody:
@@ -152,6 +168,16 @@ routes.post('/',
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist
  *        content:
@@ -173,6 +199,8 @@ routes.patch('/',
  * @swagger
  * /api/v1/kindofproduct:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return all kind of product
  *    tags: [KindOfProduct]
  *    responses:
@@ -187,6 +215,16 @@ routes.patch('/',
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/KindOfProduct'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  */
 routes.get('/', KindOfProduct.getAllKOProduct)
 
@@ -194,6 +232,8 @@ routes.get('/', KindOfProduct.getAllKOProduct)
  * @swagger
  * /api/v1/kindofproduct/{kindOfProductId}:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return a kind of product
  *    tags: [KindOfProduct]
  *    parameters:
@@ -214,6 +254,16 @@ routes.get('/', KindOfProduct.getAllKOProduct)
  *                data:
  *                  type: object
  *                  $ref: '#/components/schemas/KindOfProduct'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist
  *        content:
@@ -231,6 +281,8 @@ routes.get('/:kindOfProductId', KindOfProduct.getAKOProductByPk)
  * @swagger
  * /api/v1/kindofproduct/{kindOfProductId}:
  *  delete:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Delete a kind of product
  *    tags: [KindOfProduct]
  *    parameters:
@@ -251,6 +303,16 @@ routes.get('/:kindOfProductId', KindOfProduct.getAKOProductByPk)
  *                data:
  *                  type: string
  *                  example: The record has been deleted
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist.
  *        content:
