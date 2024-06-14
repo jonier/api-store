@@ -1,12 +1,18 @@
 const express = require('express')
 const { check } = require('express-validator')
 const User = require('../../controllers/userController')
+const checkAuth = require('../../middleware/checkAuth')
 
 const routes = express.Router()
 
 /**
  * @swagger
  * components:
+ *  securitySchemes:
+ *    bearerAuth:
+ *      type: http
+ *      scheme: bearer
+ *      bearerFormat: JWT
  *  schemas:
  *    Login:
  *      type: object
@@ -208,10 +214,14 @@ routes.post('/signup', [
  */
 routes.post('/login', User.postLogin)
 
+routes.use(checkAuth)
+
 /**
  * @swagger
  * /api/v1/users:
  *  patch:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Update a user
  *    tags: [User]
  *    requestBody:
@@ -273,6 +283,8 @@ routes.patch('/', [
  * @swagger
  * /api/v1/users:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return all users
  *    tags: [User]
  *    responses:
@@ -287,6 +299,16 @@ routes.patch('/', [
  *                  type: array
  *                  items:
  *                    $ref: '#/components/schemas/User'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  */
 routes.get('/', User.getAllUsers)
 
@@ -294,6 +316,8 @@ routes.get('/', User.getAllUsers)
  * @swagger
  * /api/v1/users/{userId}:
  *  get:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Return a user
  *    tags: [User]
  *    parameters:
@@ -314,6 +338,16 @@ routes.get('/', User.getAllUsers)
  *                data:
  *                  type: object
  *                  $ref: '#/components/schemas/User'
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist
  *        content:
@@ -331,6 +365,8 @@ routes.get('/:userId', User.getAUserByPk)
  * @swagger
  * /api/v1/users/{userId}:
  *  delete:
+ *    security:
+ *      - bearerAuth: []
  *    summary: Delete a user
  *    tags: [User]
  *    parameters:
@@ -351,6 +387,16 @@ routes.get('/:userId', User.getAUserByPk)
  *                data:
  *                  type: string
  *                  example: The record has been deleted
+ *      401:
+ *        description: The username, password or token is incorrect
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                data:
+ *                  type: string
+ *                  example: The username, password or token is incorrect
  *      404:
  *        description: The record does not exist.
  *        content:
