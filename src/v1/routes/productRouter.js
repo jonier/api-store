@@ -67,7 +67,7 @@ routes.use(checkAuth)
  *  post:
  *    security:
  *      - bearerAuth: []
- *    summary: Create a new user
+ *    summary: Create a new product
  *    tags: [Product]
  *    requestBody:
  *      required: true
