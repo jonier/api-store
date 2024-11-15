@@ -2,6 +2,19 @@ const express = require('express')
 const { check } = require('express-validator')
 const User = require('../../controllers/userController')
 const checkAuth = require('../../middleware/checkAuth')
+const multer = require('multer')
+
+// Configurar Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/') // Carpeta donde se guardarán los archivos
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`) // Nombre del archivo
+  }
+})
+
+const upload = multer({ storage })
 
 const routes = express.Router()
 
@@ -160,17 +173,19 @@ const routes = express.Router()
  *                      items:
  *                        $ref: '#/components/schemas/error'
  */
-routes.post('/signup', [
-  check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
-    .isEmail().withMessage('Not a valid e-mail address'),
-  check('userName').notEmpty().withMessage("The string can't be empty"),
-  check('userName').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
-  check('firstName').notEmpty().withMessage("The string can't be empty"),
-  check('lastName').notEmpty().withMessage("The string can't be empty"),
-  check('address').notEmpty().withMessage("The string can't be empty"),
-  check('telephone').notEmpty().withMessage("The string can't be empty"),
-  check('password').isLength({ min: 8 }).withMessage('The string can be less than 8 characters')
-], User.createAUser)
+routes.post('/signup',
+  upload.single('photo'),
+  [
+    check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
+      .isEmail().withMessage('Not a valid e-mail address'),
+    check('userName').notEmpty().withMessage("The string can't be empty"),
+    check('userName').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
+    check('firstName').notEmpty().withMessage("The string can't be empty"),
+    check('lastName').notEmpty().withMessage("The string can't be empty"),
+    check('address').notEmpty().withMessage("The string can't be empty"),
+    check('telephone').notEmpty().withMessage("The string can't be empty"),
+    check('password').isLength({ min: 8 }).withMessage('The string can be less than 8 characters')
+  ], User.createAUser)
 
 /**
  * @swagger

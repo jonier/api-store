@@ -28,14 +28,45 @@ const getAUserByPk = (req, res, next) => {
     })
 }
 
+// const saveImageChange = async (file) => {
+//   const imgData = new FormData()
+//   imgData.append('photo', file)
+//   try {
+//     const response = await fetch('http://localhost:3006/upload', {
+//       method: 'POST',
+//       body: imgData
+//     })
+
+//     if (!response.ok) {
+//       throw new Error('Error al subir el archivo.')
+//     }
+
+//     const data = await response.json()
+//     return data.filePath
+
+//     // Mostrar una vista previa de la imagen subida
+//     // preview.innerHTML = `<img src="${data.filePath}" alt="Imagen subida" style="max-width: 300px; margin-top: 20px;" />`;
+//   } catch (err) {
+//     console.log(err.message)
+//   }
+// }
+
 const createAUser = async (req, res, next) => {
   const result = validationResult(req)
 
   if (!result.isEmpty()) {
     return res.status(BAD_REQUEST).send({ error: result })
   }
+  const photo = req.file.path
 
-  const { email, userName, firstName, lastName, address, telephone, password, photo } = req.body
+  if (!photo) {
+    // return res.status(400).json({ message: 'Photo is required' })
+    return res.status(BAD_REQUEST).send({ error: 'Photo is required' })
+  }
+
+  const { email, userName, firstName, lastName, address, telephone, password } = req.body
+  // const photo = await saveImageChange(imagePreview)
+  // console.log('req.body', photo)
 
   try {
     const [user, created] = await User.findOrCreate({
