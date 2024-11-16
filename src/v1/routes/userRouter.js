@@ -3,14 +3,15 @@ const { check } = require('express-validator')
 const User = require('../../controllers/userController')
 const checkAuth = require('../../middleware/checkAuth')
 const multer = require('multer')
+const path = require('path')
 
-// Configurar Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/') // Carpeta donde se guardarán los archivos
+    console.log('Vea pues: file ', file)
+    cb(null, path.join(__dirname, '../../uploads/')) // Ruta absoluta a la carpeta uploads
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`) // Nombre del archivo
+    cb(null, `${Date.now()}-${file.originalname}`)
   }
 })
 

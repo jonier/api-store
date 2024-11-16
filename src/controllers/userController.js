@@ -57,16 +57,14 @@ const createAUser = async (req, res, next) => {
   if (!result.isEmpty()) {
     return res.status(BAD_REQUEST).send({ error: result })
   }
-  const photo = req.file.path
 
-  if (!photo) {
-    // return res.status(400).json({ message: 'Photo is required' })
-    return res.status(BAD_REQUEST).send({ error: 'Photo is required' })
+  let photo = null
+
+  if (req.file) {
+    photo = `http://localhost:3000/uploads/${req.file.filename}`
   }
 
   const { email, userName, firstName, lastName, address, telephone, password } = req.body
-  // const photo = await saveImageChange(imagePreview)
-  // console.log('req.body', photo)
 
   try {
     const [user, created] = await User.findOrCreate({
