@@ -192,6 +192,7 @@ routes.post('/',
  */
 routes.patch('/',
   [
+    check('id').notEmpty().withMessage('The id field is missing'),
     check('title').notEmpty().withMessage("The string can't be empty."),
     check('title').isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
   ], orderStatusController.updateAOrderStatus)

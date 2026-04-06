@@ -147,7 +147,7 @@ const createAOrder = async (req, res, next) => {
       return next(error)
     }
 
-    const e = getErrorFromCoreOrDb(error.errors)
+    const e = getErrorFromCoreOrDb(error && error.errors)
     next(new HttpError(e.msg, e.status))
   }
 }

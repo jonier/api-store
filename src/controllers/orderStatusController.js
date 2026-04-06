@@ -11,6 +11,9 @@ const getAllOrderStatus = (req, res, next) => {
     .then(orders => {
       res.status(OK).send({ data: orders })
     })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
+    })
 }
 
 const getAOrderStatus = (req, res, next) => {
@@ -22,6 +25,9 @@ const getAOrderStatus = (req, res, next) => {
       } else {
         res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
+    })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
     })
 }
 
@@ -91,7 +97,7 @@ const deleteOrderStatusById = async (req, res, next) => {
   try {
     const order = await OrderStatus.findByPk(orderStautsId)
     if (order) {
-      order.destroy()
+      await order.destroy()
       res.status(OK).send({ data: 'The record has been deleted' })
     } else {
       res.status(NOT_FOUND).send({ data: 'The record does not exist' })

@@ -15,6 +15,9 @@ const getAllUsers = (req, res, next) => {
     .then(users => {
       res.status(OK).send({ data: users })
     })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
+    })
 }
 
 const getAUserByPk = (req, res, next) => {
@@ -26,6 +29,9 @@ const getAUserByPk = (req, res, next) => {
       } else {
         res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
+    })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
     })
 }
 
@@ -181,7 +187,7 @@ const deleteAUserByPk = async (req, res, next) => {
   try {
     const user = await User.findByPk(userId)
     if (user) {
-      user.destroy()
+      await user.destroy()
       res.status(OK).send({ data: 'The record has been deleted' })
     } else {
       res.status(NOT_FOUND).send({ data: 'The record does not exist' })

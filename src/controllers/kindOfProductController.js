@@ -11,6 +11,9 @@ const getAllKOProduct = (req, res, next) => {
     .then(kind => {
       res.status(OK).send({ data: kind })
     })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
+    })
 }
 
 const getAKOProductByPk = (req, res, next) => {
@@ -21,8 +24,11 @@ const getAKOProductByPk = (req, res, next) => {
       if (kind) {
         res.status(OK).send({ data: kind })
       } else {
-        res.status(OK).send({ data: 'The record does not exist' })
+        res.status(NOT_FOUND).send({ data: 'The record does not exist' })
       }
+    })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
     })
 }
 
@@ -92,7 +98,7 @@ const deleteAKOProductByPk = async (req, res, next) => {
   try {
     const kind = await KindOfProduct.findByPk(kindOfProductId)
     if (kind) {
-      kind.destroy()
+      await kind.destroy()
       res.status(OK).send({ data: 'The record has been deleted' })
     } else {
       res.status(NOT_FOUND).send({ data: 'The record does not exist' })

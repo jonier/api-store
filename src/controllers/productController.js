@@ -14,6 +14,9 @@ const getAllProducts = (req, res, next) => {
     .then(products => {
       res.status(OK).send({ data: products })
     })
+    .catch(error => {
+      next(new HttpError(error.message, BAD_REQUEST))
+    })
 }
 
 const getAProductByPk = (req, res, next) => {
@@ -28,7 +31,7 @@ const getAProductByPk = (req, res, next) => {
       }
     })
     .catch(error => {
-      res.status(NOT_FOUND).send({ data: error })
+      next(new HttpError(error.message, BAD_REQUEST))
     })
 }
 
@@ -40,22 +43,22 @@ const postCreateAProduct = async (req, res, next) => {
 
   const { title, description, price, imageUrl, userId, kindOfProductId } = req.body
 
-  const validatingForeingKeys = []
-  const user = await User.findByPk(userId)
-  if (user === null) {
-    validatingForeingKeys.push(`The user ${userId} does not exist`)
-  }
-
-  const kindOfProduct = await KOP.findByPk(kindOfProductId)
-  if (kindOfProduct === null) {
-    validatingForeingKeys.push(`The kind of product ${kindOfProductId} does not exist`)
-  }
-
-  if (validatingForeingKeys.length > 0) {
-    return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
-  }
-
   try {
+    const validatingForeingKeys = []
+    const user = await User.findByPk(userId)
+    if (user === null) {
+      validatingForeingKeys.push(`The user ${userId} does not exist`)
+    }
+
+    const kindOfProduct = await KOP.findByPk(kindOfProductId)
+    if (kindOfProduct === null) {
+      validatingForeingKeys.push(`The kind of product ${kindOfProductId} does not exist`)
+    }
+
+    if (validatingForeingKeys.length > 0) {
+      return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
+    }
+
     const [product, created] = await Product.findOrCreate({
       where: { title },
       defaults: {
@@ -84,30 +87,30 @@ const postCreateAProduct = async (req, res, next) => {
 const patchUpdateAProduct = async (req, res, next) => {
   const result = validationResult(req)
   if (!result.isEmpty()) {
-    return res.send({ error: result })
+    return res.status(BAD_REQUEST).send({ error: result })
   }
 
   const { id, title, description, price, imageUrl, active, userId, kindOfProductId } = req.body
 
-  const validatingForeingKeys = []
-  const user = await User.findByPk(userId)
-  if (user === null) {
-    validatingForeingKeys.push(`The user ${userId} does not exist`)
-  }
-
-  const kindOfProduct = await KOP.findByPk(kindOfProductId)
-  if (kindOfProduct === null) {
-    validatingForeingKeys.push(`The kind of product ${kindOfProductId} does not exist`)
-  }
-
-  if (validatingForeingKeys.length > 0) {
-    return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
-  }
-
   try {
+    const validatingForeingKeys = []
+    const user = await User.findByPk(userId)
+    if (user === null) {
+      validatingForeingKeys.push(`The user ${userId} does not exist`)
+    }
+
+    const kindOfProduct = await KOP.findByPk(kindOfProductId)
+    if (kindOfProduct === null) {
+      validatingForeingKeys.push(`The kind of product ${kindOfProductId} does not exist`)
+    }
+
+    if (validatingForeingKeys.length > 0) {
+      return res.status(NOT_FOUND).send({ data: validatingForeingKeys })
+    }
+
     const product = await Product.findByPk(id)
     if (product === null) {
-      next(new HttpError('The record does not exist', NOT_FOUND))
+      return next(new HttpError('The record does not exist', NOT_FOUND))
     } else {
       product.title = title
       product.description = description
@@ -135,7 +138,7 @@ const deleteAProductByPk = async (req, res, next) => {
   try {
     const product = await Product.findByPk(productId)
     if (product) {
-      product.destroy()
+      await product.destroy()
       res.status(OK).send({ data: 'The record has been deleted' })
     } else {
       res.status(NOT_FOUND).send({ data: 'The record does not exist' })

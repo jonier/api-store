@@ -6,13 +6,26 @@
   "scripts": {
     "start": "node ./src/index.js",
     "dev": "nodemon ./src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
+  },
+  "standard": {
+    "env": {
+      "jest": true
+    }
   },
   "author": "Jonier Murillo",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^30.3.0",
     "nodemon": "3.0.1",
     "standard": "17.1.0",
+    "supertest": "^7.2.2",
     "swagger-jsdoc": "6.2.8",
     "swagger-ui-express": "5.0.0"
   },
