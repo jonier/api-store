@@ -8,6 +8,7 @@ const HttpError = require('../library/error/http-error')
 const { validationResult } = require('express-validator')
 
 const { AUTH_IS_NO_OK, OK, CREATED, NOT_FOUND, BAD_REQUEST } = HttpStatusCode
+const JWT_SECRET = process.env.JWT_SECRET
 
 const getAllUsers = (req, res, next) => {
   User.findAll()
@@ -100,9 +101,11 @@ const postLogin = async (req, res, next) => {
     password = password.toString()
   }
 
-  const resUser = await User.findAll({ where: { [Op.or]: [{ email: identity }, { userName: identity }] } })
-  if (resUser.length === 1) {
-    const user = resUser[0]
+  const user = await User.scope('withPassword').findOne({ where: { [Op.or]: [{ email: identity }, { userName: identity }] } })
+  if (user) {
+    if (!JWT_SECRET) {
+      return res.status(500).send({ data: 'Server configuration error.' })
+    }
 
     const isValidPassword = await bcrypt.compare(password, user.password)
 
@@ -112,11 +115,11 @@ const postLogin = async (req, res, next) => {
       try {
         token = jwt.sign(
           { userId: user.id, email: user.email },
-          'portfolio21',
+          JWT_SECRET,
           { expiresIn: '1h' }
         )
       } catch (error) {
-        res.status(BAD_REQUEST).send({ data: error })
+        return res.status(BAD_REQUEST).send({ data: error.message })
       }
 
       res.status(OK).send({
@@ -130,10 +133,10 @@ const postLogin = async (req, res, next) => {
         }
       })
     } else {
-      res.status(AUTH_IS_NO_OK).send({ data: 'The password is wrong' })
+      res.status(AUTH_IS_NO_OK).send({ data: 'Invalid credentials' })
     }
   } else {
-    res.status(AUTH_IS_NO_OK).send({ data: 'User does not exist' })
+    res.status(AUTH_IS_NO_OK).send({ data: 'Invalid credentials' })
   }
 }
 

@@ -51,6 +51,14 @@ const User = sequelize.define('user',
     }
   },
   {
+    defaultScope: {
+      attributes: { exclude: ['password'] }
+    },
+    scopes: {
+      withPassword: {
+        attributes: { include: ['password'] }
+      }
+    },
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {
@@ -63,11 +71,6 @@ const User = sequelize.define('user',
           const salt = await bcrypt.genSaltSync(10, 'a')
           user.password = bcrypt.hashSync(user.password, salt)
         }
-      }
-    },
-    instanceMethods: {
-      validPassword: (password) => {
-        return bcrypt.compareSync(password, this.password)
       }
     }
   }

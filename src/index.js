@@ -66,11 +66,11 @@ app.use((req, res, next) => {
 })
 
 app.use((error, req, res, next) => {
-  if (res.headerSend) {
+  if (res.headersSent) {
     return next(error)
   }
-  // res.status(error.code || 500).send({ status: error.code || 500, message: JSON.parse(error.message) || 'An unknown error occurred' })
-  res.status(error.code || 500).send({ message: JSON.parse(error.message) || 'An unknown error occurred' })
+  const message = typeof error.message === 'string' ? error.message : 'An unknown error occurred'
+  res.status(error.code || 500).send({ message })
 })
 
 sequelize
