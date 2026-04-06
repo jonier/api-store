@@ -1,6 +1,8 @@
 // Set env vars before any module is loaded
 process.env.JWT_SECRET = 'test-secret'
 process.env.NODE_ENV = 'test'
+process.env.LOGIN_WINDOW_MS = '60000'
+process.env.LOGIN_MAX_ATTEMPTS = '2'
 
 const request = require('supertest')
 
@@ -67,6 +69,7 @@ describe('POST /api/v1/users/login', () => {
 
     const res = await request(app)
       .post('/api/v1/users/login')
+      .set('x-test-key', 'login-success')
       .send({ identity: 'test@test.com', password: '12345678' })
 
     expect(res.status).toBe(200)
@@ -85,6 +88,7 @@ describe('POST /api/v1/users/login', () => {
 
     const res = await request(app)
       .post('/api/v1/users/login')
+      .set('x-test-key', 'wrong-password')
       .send({ identity: 'test@test.com', password: 'wrong' })
 
     expect(res.status).toBe(401)
@@ -96,9 +100,34 @@ describe('POST /api/v1/users/login', () => {
 
     const res = await request(app)
       .post('/api/v1/users/login')
+      .set('x-test-key', 'user-not-found')
       .send({ identity: 'nobody@test.com', password: '12345678' })
 
     expect(res.status).toBe(401)
     expect(res.body.data).toBe('Invalid credentials')
+  })
+
+  test('429 — blocks repeated failed login attempts', async () => {
+    User.scope.mockReturnValue({ findOne: jest.fn().mockResolvedValue(null) })
+
+    const firstAttempt = await request(app)
+      .post('/api/v1/users/login')
+      .set('x-test-key', 'rate-limit-user')
+      .send({ identity: 'nobody@test.com', password: '12345678' })
+
+    const secondAttempt = await request(app)
+      .post('/api/v1/users/login')
+      .set('x-test-key', 'rate-limit-user')
+      .send({ identity: 'nobody@test.com', password: '12345678' })
+
+    const thirdAttempt = await request(app)
+      .post('/api/v1/users/login')
+      .set('x-test-key', 'rate-limit-user')
+      .send({ identity: 'nobody@test.com', password: '12345678' })
+
+    expect(firstAttempt.status).toBe(401)
+    expect(secondAttempt.status).toBe(401)
+    expect(thirdAttempt.status).toBe(429)
+    expect(thirdAttempt.body.data).toBe('Too many login attempts. Please try again later.')
   })
 })

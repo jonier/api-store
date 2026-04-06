@@ -2,6 +2,7 @@ const express = require('express')
 const Product = require('../../controllers/productController')
 const { check } = require('express-validator')
 const checkAuth = require('../../middleware/checkAuth')
+const { writeLimiter } = require('../../middleware/rateLimit')
 const routes = express.Router()
 
 routes.use(checkAuth)
@@ -133,13 +134,14 @@ routes.use(checkAuth)
  *                  example: ["The user 16 does not exist", "The kind of product 44 does not exist"]
  */
 routes.post('/',
+  writeLimiter,
   [
-    check('title').notEmpty().withMessage("The string can't be empty"),
-    check('title').isLength({ min: 3 }).withMessage('The string can be less than 3 characters'),
-    check('description').notEmpty().withMessage("The string can't be empty"),
-    check('description').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
+    check('title').trim().escape().notEmpty().withMessage("The string can't be empty")
+      .isLength({ min: 3 }).withMessage('The string can be less than 3 characters'),
+    check('description').trim().escape().notEmpty().withMessage("The string can't be empty")
+      .isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
     check('price').notEmpty().withMessage("The string can't be empty"),
-    check('imageUrl').notEmpty().withMessage("The string can't be empty"),
+    check('imageUrl').trim().notEmpty().withMessage("The string can't be empty"),
     check('userId').notEmpty().withMessage('The userId can not empty'),
     check('kindOfProductId').notEmpty().withMessage('The kindOfProductId can not empty')
   ], Product.postCreateAProduct)
@@ -206,14 +208,15 @@ routes.post('/',
  *                  example: The record does not exist
  */
 routes.patch('/',
+  writeLimiter,
   [
     check('id').notEmpty().withMessage('The id field is missing'),
-    check('title').notEmpty().withMessage("The string can't be empty"),
-    check('title').isLength({ min: 3 }).withMessage('The string can be less than 3 characters'),
-    check('description').notEmpty().withMessage("The string can't be empty"),
-    check('description').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
+    check('title').trim().escape().notEmpty().withMessage("The string can't be empty")
+      .isLength({ min: 3 }).withMessage('The string can be less than 3 characters'),
+    check('description').trim().escape().notEmpty().withMessage("The string can't be empty")
+      .isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
     check('price').notEmpty().withMessage("The string can't be empty"),
-    check('imageUrl').notEmpty().withMessage("The string can't be empty"),
+    check('imageUrl').trim().notEmpty().withMessage("The string can't be empty"),
     check('userId').notEmpty().withMessage('The userId can not empty'),
     check('kindOfProductId').notEmpty().withMessage('The kindOfProductId can not empty')
   ], Product.patchUpdateAProduct)
@@ -348,6 +351,6 @@ routes.get('/:productId', Product.getAProductByPk)
  *                  example: The record does not exist
  */
 
-routes.delete('/:productId', Product.deleteAProductByPk)
+routes.delete('/:productId', writeLimiter, Product.deleteAProductByPk)
 
 module.exports = routes

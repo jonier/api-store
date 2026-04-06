@@ -4,6 +4,7 @@
 ![Express](https://img.shields.io/badge/Express-4-000000?logo=express)
 ![Sequelize](https://img.shields.io/badge/Sequelize-6-52B0E7?logo=sequelize)
 ![Tests](https://img.shields.io/badge/tests-14%20passed-brightgreen?logo=jest)
+![Security](https://img.shields.io/badge/security-helmet%20%2B%20CORS-orange)
 ![License](https://img.shields.io/badge/license-ISC-blue)
 
 REST API for an online store built with Node.js, Express and Sequelize (MySQL).
@@ -17,7 +18,9 @@ REST API for an online store built with Node.js, Express and Sequelize (MySQL).
 | ORM | Sequelize 6 + MySQL (mysql2) |
 | Auth | JWT (jsonwebtoken) + bcrypt |
 | Validation | express-validator |
-| File uploads | multer |
+| Security headers | helmet |
+| Auth hardening | express-rate-limit |
+| File uploads | multer (images only, max 2 MB) |
 | Docs | Swagger UI (`/api/v1/doc`) |
 | Testing | Jest + Supertest |
 | Linter | Standard JS |
@@ -51,7 +54,18 @@ cp .env.example .env
 | `DB_USER` | MySQL user |
 | `DB_PASS` | MySQL password |
 | `DB_DATA_BASE` | Database name |
-| `JWT_SECRET` | Secret key for signing JWT tokens |
+| `JWT_SECRET` | Secret key for signing JWT tokens (min 32 chars recommended) |
+| `ALLOWED_ORIGIN` | Allowed CORS origin (e.g. `http://localhost:4200`) |
+| `API_WINDOW_MS` | Global API rate-limit window in milliseconds (default `900000` = 15 min) |
+| `API_MAX_REQUESTS` | Max requests allowed for the whole API per window (default `200`) |
+| `LOGIN_WINDOW_MS` | Login rate-limit window in milliseconds (default `900000` = 15 min) |
+| `LOGIN_MAX_ATTEMPTS` | Max failed login attempts allowed per window (default `5`) |
+| `SIGNUP_WINDOW_MS` | Signup rate-limit window in milliseconds (default `3600000` = 60 min) |
+| `SIGNUP_MAX_ATTEMPTS` | Max signup attempts allowed per window (default `3`) |
+| `WRITE_WINDOW_MS` | Write rate-limit window for POST/PATCH/DELETE routes (default `900000` = 15 min) |
+| `WRITE_MAX_REQUESTS` | Max write requests allowed per window (default `30`) |
+| `DOCS_WINDOW_MS` | Swagger docs rate-limit window in milliseconds (default `900000` = 15 min) |
+| `DOCS_MAX_REQUESTS` | Max Swagger requests allowed per window (default `20`) |
 | `GOOGLE_API_KEY` | Google API key (optional) |
 | `PORT` | Server port (default `3000`) |
 
@@ -176,6 +190,8 @@ http://localhost:3000/api/v1/doc
 
 **JWT authentication** — The user identity (`userId`) is extracted exclusively from the signed JWT token, never from the request body. This prevents users from accessing or modifying other users' orders.
 
+**Layered rate limiting** — The API uses separate limiters for global traffic, Swagger, login, signup, and write operations. This keeps normal reads usable while applying tighter limits to authentication and state-changing routes.
+
 **Password protection** — The `User` model uses a Sequelize `defaultScope` that excludes the `password` field from every query by default. Only the login flow uses the `withPassword` scope explicitly.
 
 **Testability** — The Express app is decoupled from the database startup in `src/app.js`, allowing the test suite to import the app and run 14 integration tests completely offline with mocked models.
@@ -191,6 +207,26 @@ Validation errors (400) return:
 ```json
 { "error": { "errors": [{ "type": "field", "msg": "The productId can not be empty", "path": "productId", "location": "body" }] } }
 ```
+
+---
+
+## Security
+
+| Threat | Protection |
+|--------|------------|
+| **SQL Injection** | Sequelize uses prepared statements for all queries — user input is never interpolated into SQL |
+| **CSRF** | Stateless JWT auth via `Authorization` header — the browser never sends it automatically, so CSRF has no attack vector |
+| **XSS / data injection** | `express-validator` `.trim().escape()` sanitizes all text inputs before they reach the database |
+| **Sensitive HTTP headers** | `helmet` removes `X-Powered-By` and sets `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, etc. |
+| **CORS** | Restricted to `ALLOWED_ORIGIN` env var — only the configured frontend domain is accepted |
+| **API flooding** | A global limiter on `/api/v1` reduces abusive traffic spikes before they reach the routers |
+| **Brute-force login attempts** | `express-rate-limit` restricts failed login attempts per IP and returns `429 Too Many Requests` |
+| **Mass account creation** | Signup requests are rate-limited separately from login to reduce automated account creation |
+| **Write abuse / spam** | POST, PATCH and DELETE operations use a stricter limiter than read routes |
+| **Swagger scraping** | `/api/v1/doc` has its own limiter to reduce automated enumeration of API documentation |
+| **Malicious file uploads** | `multer` rejects non-image MIME types and enforces a 2 MB size limit |
+| **Password exposure** | Sequelize `defaultScope` excludes the `password` field from every query — only the login flow fetches it explicitly |
+| **Token secret** | JWT secret is read from `process.env.JWT_SECRET` — never hardcoded |
 
 ---
 
@@ -221,7 +257,7 @@ npx jest --coverage
 
 | File | Scenarios |
 |------|-----------|
-| `src/__tests__/auth.test.js` | Login 200, 401 wrong password, 401 user not found |
+| `src/__tests__/auth.test.js` | Login 200, 401 wrong password, 401 user not found, 429 brute-force protection |
 | `src/__tests__/orders.test.js` | GET/POST orders — 200, 400, 401, 404 |
 
 ## Project Structure
@@ -247,7 +283,6 @@ src/
 - [ ] Integration tests against a real in-memory database (SQLite)
 - [ ] Pagination and filtering on list endpoints
 - [ ] Order cancellation and status transition workflow
-- [ ] Rate limiting and helmet security headers
 - [ ] Docker + docker-compose for local development
 
 ## License

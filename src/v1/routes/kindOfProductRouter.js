@@ -2,6 +2,7 @@ const express = require('express')
 const KindOfProduct = require('../../controllers/kindOfProductController')
 const { check } = require('express-validator')
 const checkAuth = require('../../middleware/checkAuth')
+const { writeLimiter } = require('../../middleware/rateLimit')
 const routes = express.Router()
 
 routes.use(checkAuth)
@@ -124,8 +125,9 @@ routes.use(checkAuth)
  *                  example: The username, password or token is incorrect
  */
 routes.post('/',
+  writeLimiter,
   [
-    check('title').notEmpty().withMessage("The string can't be empty")
+    check('title').trim().escape().notEmpty().withMessage("The string can't be empty")
   ], KindOfProduct.createAKOProduct)
 
 /**
@@ -190,9 +192,10 @@ routes.post('/',
  *                  example: The record does not exist
  */
 routes.patch('/',
+  writeLimiter,
   [
     check('id').notEmpty().withMessage("The string can't be empty"),
-    check('title').notEmpty().withMessage("The string can't be empty")
+    check('title').trim().escape().notEmpty().withMessage("The string can't be empty")
   ], KindOfProduct.updateAKOProduct)
 
 /**
@@ -324,6 +327,6 @@ routes.get('/:kindOfProductId', KindOfProduct.getAKOProductByPk)
  *                  type: string
  *                  example: The record does not exist
  */
-routes.delete('/:kindOfProductId', KindOfProduct.deleteAKOProductByPk)
+routes.delete('/:kindOfProductId', writeLimiter, KindOfProduct.deleteAKOProductByPk)
 
 module.exports = routes

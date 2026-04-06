@@ -2,20 +2,35 @@ const express = require('express')
 const { check } = require('express-validator')
 const User = require('../../controllers/userController')
 const checkAuth = require('../../middleware/checkAuth')
+const { loginLimiter, signupLimiter, writeLimiter } = require('../../middleware/rateLimit')
 const multer = require('multer')
 const path = require('path')
 
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_FILE_SIZE_MB = 2
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    console.log('Vea pues: file ', file)
-    cb(null, path.join(__dirname, '../../uploads/')) // Ruta absoluta a la carpeta uploads
+    cb(null, path.join(__dirname, '../../uploads/'))
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`)
   }
 })
 
-const upload = multer({ storage })
+const fileFilter = (req, file, cb) => {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true)
+  } else {
+    cb(new Error('Only JPEG, PNG and WebP images are allowed'), false)
+  }
+}
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 }
+})
 
 const routes = express.Router()
 
@@ -173,18 +188,20 @@ const routes = express.Router()
  *                      type: array
  *                      items:
  *                        $ref: '#/components/schemas/error'
+ *      429:
+ *        description: Too many signup attempts. Try again later.
  */
 routes.post('/signup',
+  signupLimiter,
   upload.single('photo'),
   [
-    check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
-      .isEmail().withMessage('Not a valid e-mail address'),
-    check('userName').notEmpty().withMessage("The string can't be empty"),
-    check('userName').isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
-    check('firstName').notEmpty().withMessage("The string can't be empty"),
-    check('lastName').notEmpty().withMessage("The string can't be empty"),
-    check('address').notEmpty().withMessage("The string can't be empty"),
-    check('telephone').notEmpty().withMessage("The string can't be empty"),
+    check('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail address'),
+    check('userName').trim().notEmpty().withMessage("The string can't be empty")
+      .isLength({ min: 8 }).withMessage('The string can be less than 8 characters'),
+    check('firstName').trim().escape().notEmpty().withMessage("The string can't be empty"),
+    check('lastName').trim().escape().notEmpty().withMessage("The string can't be empty"),
+    check('address').trim().escape().notEmpty().withMessage("The string can't be empty"),
+    check('telephone').trim().notEmpty().withMessage("The string can't be empty"),
     check('password').isLength({ min: 8 }).withMessage('The string can be less than 8 characters')
   ], User.createAUser)
 
@@ -227,8 +244,10 @@ routes.post('/signup',
  *                data:
  *                  type: string
  *                  example: The user does not exist
+ *      429:
+ *        description: Too many failed login attempts. Try again later.
  */
-routes.post('/login', User.postLogin)
+routes.post('/login', loginLimiter, User.postLogin)
 
 routes.use(checkAuth)
 
@@ -293,7 +312,7 @@ routes.use(checkAuth)
  *                  type: string
  *                  example: The record does not exist
  */
-routes.patch('/', [
+routes.patch('/', writeLimiter, [
   check('id').notEmpty().withMessage('The id field is missing'),
   check('email').normalizeEmail() // jonierm@gmail.com => jonierm@gmail.com
     .isEmail().withMessage('Not a valid e-mail address'),
@@ -434,6 +453,6 @@ routes.get('/:userId', User.getAUserByPk)
  *                  type: string
  *                  example: The record does not exist
  */
-routes.delete('/:userId', User.deleteAUserByPk)
+routes.delete('/:userId', writeLimiter, User.deleteAUserByPk)
 
 module.exports = routes

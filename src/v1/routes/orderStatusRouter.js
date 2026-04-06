@@ -2,6 +2,7 @@ const express = require('express')
 const { check } = require('express-validator')
 const orderStatusController = require('../../controllers/orderStatusController')
 const checkAuth = require('../../middleware/checkAuth')
+const { writeLimiter } = require('../../middleware/rateLimit')
 const routes = express.Router()
 
 routes.use(checkAuth)
@@ -124,6 +125,7 @@ routes.use(checkAuth)
  *                  example: The user does not exist
  */
 routes.post('/',
+  writeLimiter,
   [
     check('title').notEmpty().withMessage("The string can't be empty."),
     check('title').isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
@@ -191,10 +193,11 @@ routes.post('/',
  *                  example: The record does not exist
  */
 routes.patch('/',
+  writeLimiter,
   [
     check('id').notEmpty().withMessage('The id field is missing'),
-    check('title').notEmpty().withMessage("The string can't be empty."),
-    check('title').isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
+    check('title').trim().escape().notEmpty().withMessage("The string can't be empty.")
+      .isLength({ min: 5 }).withMessage('The string can be less than 5 characters')
   ], orderStatusController.updateAOrderStatus)
 
 /**
@@ -326,6 +329,6 @@ routes.get('/:orderStatusId', orderStatusController.getAOrderStatus)
  *                  type: string
  *                  example: The record does not exist
  */
-routes.delete('/:orderStatusId', orderStatusController.deleteOrderStatusById)
+routes.delete('/:orderStatusId', writeLimiter, orderStatusController.deleteOrderStatusById)
 
 module.exports = routes
