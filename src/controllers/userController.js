@@ -68,7 +68,7 @@ const createAUser = async (req, res, next) => {
   let photo = null
 
   if (req.file) {
-    photo = `http://localhost:3000/uploads/${req.file.filename}`
+    photo = `${process.env.ALLOWED_SERVER_DOCUMENTS}/${req.file.filename}`
   }
 
   const { email, userName, firstName, lastName, address, telephone, password } = req.body
