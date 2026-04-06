@@ -3,11 +3,24 @@
 ![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4-000000?logo=express)
 ![Sequelize](https://img.shields.io/badge/Sequelize-6-52B0E7?logo=sequelize)
-![Tests](https://img.shields.io/badge/tests-14%20passed-brightgreen?logo=jest)
+![Tests](https://img.shields.io/badge/tests-15%20passed-brightgreen?logo=jest)
 ![Security](https://img.shields.io/badge/security-helmet%20%2B%20CORS-orange)
 ![License](https://img.shields.io/badge/license-ISC-blue)
 
 REST API for an online store built with Node.js, Express and Sequelize (MySQL).
+
+## Project Highlights
+
+- Modular architecture with separated routes, controllers, models and middleware
+- Secure authentication with JWT and bcrypt password hashing
+- OWASP-oriented hardening: helmet, input sanitization, CORS restriction, upload restrictions and layered rate limiting
+- Business integrity controls with database transactions and server-side price validation
+- Swagger documentation for easier integration and review
+- Integration test suite with Jest and Supertest (15/15 passing)
+
+## Why This Project
+
+This project started as a CRUD API and evolved into a production-style backend focused on security, consistency and maintainability. The goal was to demonstrate real backend engineering practices beyond basic endpoint creation.
 
 ## Tech Stack
 
@@ -284,6 +297,17 @@ src/
 - [ ] Pagination and filtering on list endpoints
 - [ ] Order cancellation and status transition workflow
 - [ ] Docker + docker-compose for local development
+
+## Professional Snapshot
+
+This repository demonstrates practical backend skills for junior backend roles:
+
+- REST API design with Express and Sequelize
+- Authentication and authorization with JWT
+- Input validation and sanitization with express-validator
+- Security-first middleware strategy (helmet, CORS, rate limiting, upload filtering)
+- Transaction-safe business logic for order creation
+- Automated integration testing and API documentation
 
 ## License
 
